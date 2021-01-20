@@ -109,20 +109,15 @@ cookieToStr <- function(
 
   if (!missing(expiration)){
     if (is.numeric(expiration)){
-      # Number of seconds in the future
-      expy <- now + expiration
-      expyStr <- format(expy, format="%a, %e %b %Y %T", tz="GMT", usetz=TRUE)
-
-      str <- paste0(str, "Expires= ", expyStr, "; ")
-      str <- paste0(str, "Max-Age= ", expiration, "; ")
+      secondsUntilExp <- as.integer(now + expiration)
     } else if (inherits(expiration, "POSIXt")){
-      seconds <- difftime(expiration, now, units="secs")
-      # TODO: DRY
-      expyStr <- format(expiration, format="%a, %e %b %Y %T", tz="GMT", usetz=TRUE)
-      str <- paste0(str, "Expires= ", expyStr, "; ")
-      str <- paste0(str, "Max-Age= ", as.integer(seconds), "; ")
-    } # interpret all other values as session cookies.
-  }
+      secondsUntilExp <- difftime(expiration, now, units="secs")
+    } 
+    
+    expyStr <- format(secondsUntilExp, format="%a, %e %b %Y %T", tz="GMT", usetz=TRUE)
+    str <- paste0(str, "Expires= ", expyStr, "; ")
+    str <- paste0(str, "Max-Age= ", secondsUntilExp, "; ")
+  } # interpret all other values as session cookies.
 
   # Trim last '; '
   ret <- substr(str, 0, nchar(str)-2)
